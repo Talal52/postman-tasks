@@ -8,18 +8,21 @@ import (
 
 func main() {
 	data := make(map[string]string)
-	data["a"] = "12"
 	router := gin.Default()
 	router.GET("/key/:data1", func(c *gin.Context) {
 		data1 := c.Param("data1")
 		value, exists := data[data1]
 		if exists {
-			c.String(http.StatusOK, "Key %s, Value: %s", data1, value)
+			c.JSON(http.StatusOK, gin.H{
+				"key":   data1,
+				"value": value,
+			})
 		} else {
-			c.String(http.StatusNotFound, "Key %s not exist", data1)
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "Key not found",
+			})
 		}
 	})
-
 	router.POST("/store", func(c *gin.Context) {
 		var vertex struct {
 			Key   string `json:"key"`
@@ -27,14 +30,16 @@ func main() {
 		}
 
 		if err := c.BindJSON(&vertex); err != nil {
-			c.String(http.StatusBadRequest, "Donot added")
-			return
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid request body",
+			})
 		}
 
 		data[vertex.Key] = vertex.Value
-		c.String(http.StatusOK, "key-value : %s", data)
-		
-		c.JSON(http.StatusOK, gin.H{"message": "key and value successfully added"})
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Key-value pair added successfully",
+			"data":    data,
+		})
 	})
 
 	router.Run(":8080")
