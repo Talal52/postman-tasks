@@ -9,17 +9,54 @@ import (
 func main() {
 	data := make(map[string]string)
 	router := gin.Default()
-	router.GET("/key/:data1", func(c *gin.Context) {
-		data1 := c.Param("data1")
-		value, exists := data[data1]
+	router.GET("/key/:input", func(c *gin.Context) {
+		input := c.Param("input")
+		value, exists := data[input]
 		if exists {
 			c.JSON(http.StatusOK, gin.H{
-				"key":   data1,
+				"key":   input,
 				"value": value,
 			})
 		} else {
 			c.JSON(http.StatusNotFound, gin.H{
-				"error": "Key not found",
+				"error message": "entered Key is not found!!!",
+			})
+		}
+	})
+	router.DELETE("/delete/:input", func(c *gin.Context) {
+		input := c.Param("input")
+		_, exists := data[input]
+		if exists {
+			var vertex struct {
+				Value string `json:"value"`
+			}
+			delete(data, vertex.Value)
+			c.JSON(http.StatusOK, gin.H{
+				"message": "deleted successfully",
+				"data":    data,
+			})
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "entered key not found",
+			})
+		}
+	})
+	router.PUT("/update/:input", func(c *gin.Context) {
+		input := c.Param("input")
+		_, exists := data[input]
+		if exists {
+			var vertex struct {
+				Value string `json:"value"`
+			}
+
+			data[input] = vertex.Value
+			c.JSON(http.StatusOK, gin.H{
+				"output": "successfully update the entered value",
+				"data":   data,
+			})
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "entered key is not found",
 			})
 		}
 	})
@@ -31,7 +68,7 @@ func main() {
 
 		if err := c.BindJSON(&vertex); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid request body",
+				"error message": "Invalid input",
 			})
 		}
 
@@ -41,6 +78,5 @@ func main() {
 			"data":    data,
 		})
 	})
-
 	router.Run(":8080")
 }
