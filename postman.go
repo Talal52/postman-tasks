@@ -46,20 +46,22 @@ func main() {
 		}
 	})
 
-	router.PUT("/update/:input", func(c *gin.Context) {
-		input := c.Param("input")
-		_, exists := data[input]
+	router.PUT("/update/:req.key", func(c *gin.Context) {
+		//input := c.Param("input")
+		var req response
+		if err := c.BindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Invalid input",
+			})
+			return
+		}
+		_, exists := data[req.Key]
 		if exists {
-			var requestBody response
-			if err := c.BindJSON(&requestBody); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"message": "Invalid input",
-				})
-				return
-			}
-			data[input] = requestBody.Value
+			updatedValue := req.Value
+			//data[req.Key] = updatedValue
+			data[req.Key] = updatedValue
 			c.JSON(http.StatusOK, gin.H{
-				"output": "successfully update the entered value",
+				"output": "successfully updated the entered value",
 				"data":   data,
 			})
 		} else {
